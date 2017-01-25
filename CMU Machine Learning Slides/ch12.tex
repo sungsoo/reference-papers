@@ -1,0 +1,201 @@
+
+\slidehead{\large  Combining Inductive and Analytical Learning \red \ } \bk
+
+
+\centerline{[Read Ch. 12]}
+\centerline{[Suggested exercises: 12.1, 12.2, 12.6, 12.7, 12.8]}
+
+\bi
+\item Why combine inductive and analytical learning?
+\item KBANN: Prior knowledge to initialize the hypothesis
+\item TangetProp, EBNN: Prior knowledge alters search objective
+\item FOCL: Prior knowledge alters search operators
+\ei
+
+
+\slidehead{\large  Inductive and Analytical Learning \red \ } \bk
+\begin{tabular}{ll} 
+ {\bf Inductive learning} & {\bf Analytical learning} \\
+ Hypothesis fits data & Hypothesis fits domain theory \\
+ Statistical inference & Deductive inference \\
+ Requires little prior knowledge & Learns from scarce data  \\
+ Syntactic inductive bias & Bias is domain theory \\
+\end{tabular}
+
+
+\slidehead{\large What We Would Like \red \ } \bk
+
+\centerline{\hbox{\psfig{file=./bookps/ebnn-1.ps,width=6.5in}}}
+
+\bigskip
+
+\bigskip
+
+General purpose learning method:
+\bi
+\item No domain theory $\ra$ learn as well as inductive methods
+\item Perfect domain theory $\ra$ learn as well as \pgm{Prolog-EBG}
+\item Accomodate arbitrary and unknown errors in domain theory
+\item Accomodate arbitrary and unknown errors in training data
+\ei
+
+\newpage
+Domain theory:
+\begin{center}
+ Cup $\la$ Stable, Liftable, OpenVessel
+
+ Stable $\la$ BottomIsFlat
+
+ Liftable $\la$ Graspable, Light
+
+ Graspable $\la$ HasHandle
+
+ OpenVessel $\la$ HasConcavity, ConcavityPointsUp
+\end{center}
+
+\vspace*{.3in}
+Training examples:
+
+\begin{center}
+\begin{tabular}{|lcccc|cccccc|} \hline
+& \multicolumn{4}{c|}{Cups} & \multicolumn{6}{c|}{Non-Cups} \\
+BottomIsFlat   & \ch & \ch & \ch & \ch &  \ch & \ch & \ch & & & \ch \\
+ConcavityPoints Up & \ch & \ch & \ch & \ch & \ch  & & \ch & \ch & & \\
+Expensive & \ch & & \ch & &  & & \ch & & \ch & \\
+Fragile & \ch & \ch & & & \ch  & \ch & & \ch & & \ch \\ 
+HandleOnTop & & & & & \ch  & & \ch & & & \\
+HandleOnSide & \ch & & & \ch &  & & & & \ch & \\
+HasConcavity       & \ch & \ch & \ch & \ch &  \ch & & \ch & \ch & \ch & \ch \\
+HasHandle & \ch & & & \ch & \ch & & \ch & & \ch & \\
+Light               & \ch & \ch & \ch & \ch & \ch  & \ch & \ch & & \ch & \\
+MadeOfCeramic & \ch & & & & \ch  & & \ch & \ch & & \\
+MadeOfPaper   & & & & \ch &  & & & & \ch & \\
+MadeOfStyrofoam & & \ch & \ch & &  & \ch & & & & \ch \\ \hline
+\end{tabular}
+\end{center}
+
+\slidehead{\large KBANN \red \ } \bk
+
+KBANN (data $D$, domain theory $B$)
+\be
+\item Create a feedforward network $h$ equivalent to $B$
+\item Use \pgm{Backprop} to tune $h$ to fit $D$
+\ee
+
+
+\slidehead{\large Neural Net Equivalent to Domain Theory \red \ } \bk
+
+
+\centerline{\hbox{\psfig{file=./bookps/ind-ana-kbann2.epsf,width=6in}}}
+
+\slidehead{Creating Network Equivalent to Domain Theory \red \ }
+\bk
+
+Create one unit per horn clause rule (i.e., an AND unit)
+\bi
+\item Connect unit inputs to corresponding clause antecedents
+\item For each non-negated antecedent, corresponding input weight $w \la W$,
+where $W$ is some constant
+\item For each negated antecedent, input weight $w \la -W$
+\item Threshold weight $w_0 \la -(n-.5)W$, where $n$ is number of non-negated antecedents
+\ei
+
+\bigskip
+Finally, add many additional connections with near-zero weights
+\bigskip
+
+\[ Liftable \la Graspable, \neg Heavy \]
+
+
+
+\slidehead{\large Result of refining the network \red \ } \bk
+\centerline{\hbox{\psfig{file=./bookps/ind-ana-kbann3.epsf,width=6in}}}
+
+\slidehead{\large  KBANN Results \red \ } \bk
+
+Classifying promoter regions in DNA
+
+leave one out testing:
+\bi
+\item Backpropagation: error rate 8/106
+\item KBANN: 4/106
+\ei
+
+
+\bigskip
+Similar improvements on other classification, control tasks.
+
+\slidehead{\large  Hypothesis space search in \pgm{KBANN} \red \ } \bk
+
+\centerline{\hbox{\psfig{file=./bookps/kbann-search.ps,width=6in}}}
+
+\slidehead{\pgm{EBNN} \red \ } \bk
+
+Key idea:
+\bi
+\item Previously learned approximate domain theory
+\item Domain theory represented by collection of neural networks
+\item Learn target function as another neural network
+\ei
+
+\newpage
+\centerline{\hbox{\psfig{file=./bookps/ebnn-expl.ps,width=5.7in}}}
+
+\slidehead{\large Modified Objective for Gradient Descent \red \ } \bk
+
+\[ E = \sum_i \left[(f(x_{i}) - \hat{f}(x_{i}))^{2} + \mu_{i} \sum_{j}
+\left(\frac{\partial A(x)}{\partial x^{j}} - \frac{\partial \hat{f}(x)}{\partial{x^{j}}} \right)_{(x=x_{i})}^{2} \right] \]
+where
+\[ \mu_{i} \equiv 1 - \frac{|A(x_{i}) - f(x_{i})|}{c} \]
+
+\bigskip 
+
+\bi
+\item $f(x)$ is target function
+\item $\hat{f}(x)$ is neural net approximation to $f(x)$
+\item $A(x)$ is domain theory approximation to $f(x)$
+\ei
+
+
+\newpage
+\centerline{\hbox{\psfig{file=./bookps/tanprop-slopes.ps,width=7in}}}
+
+
+\slidehead{\large Hypothesis Space Search in EBNN \red \ } \bk
+
+\centerline{\hbox{\psfig{file=./bookps/tanprop-search.ps,width=5in}}}
+
+
+\slidehead{\large Search in FOCL \red \ } \bk
+
+\centerline{\hbox{\psfig{file=./bookps/focl-search.ps,width=6.5in}}}
+
+\slidehead{\large FOCL Results \red \ } \bk
+
+Recognizing legal chess endgame positions:
+\bi
+\item 30 positive, 30 negative examples
+\item \pgm{FOIL}: 86\%
+\item \pgm{FOCL}: 94\% (using domain theory with 76\% accuracy)
+\ei
+
+NYNEX telephone network diagnosis
+\bi
+\item 500 training examples
+\item \pgm{FOIL}: 90\%
+\item \pgm{FOCL}: 98\% (using domain theory with 95\% accuracy)
+\ei
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
